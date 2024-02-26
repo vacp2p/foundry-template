@@ -29,6 +29,7 @@
     "prettier:check": "prettier --check **/*.{json,md,yml} --ignore-path=.prettierignore",
     "prettier:write": "prettier --write **/*.{json,md,yml} --ignore-path=.prettierignore",
     "gas-report": "forge test --gas-report 2>&1 | (tee /dev/tty | awk '/Test result:/ {found=1; buffer=\"\"; next} found && !/Ran/ {buffer=buffer $0 ORS} /Ran/ {found=0} END {printf \"%s\", buffer}' > .gas-report)",
-    "release": "commit-and-tag-version"
+    "release": "commit-and-tag-version",
+    "adorno": "pnpm prettier:write && forge fmt && forge snapshot && pnpm gas-report"
   }
 }
