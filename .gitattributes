@@ -1,3 +1,6 @@
 lib/** linguist-vendored
 
 * text=auto eol=lf
+
+.gas-report merge=ours 
+.gas-snapshot merge=ours
