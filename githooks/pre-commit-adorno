@@ -14,7 +14,7 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-git add .
+git add -p
 
 echo "Successfully ran pnpm run adorno and added modified files."
 
