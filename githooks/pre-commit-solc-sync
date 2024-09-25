@@ -1,0 +1,66 @@
+#!/bin/bash
+
+# Initialize a flag to track if we are in the [profile.default] section
+in_profile_default=false
+
+# Loop through each line of foundry.toml
+while IFS= read -r line
+do
+  # Check if we are entering the [profile.default] section
+  if [[ "$line" =~ ^\[profile\.default\] ]]; then
+    in_profile_default=true
+  fi
+
+  # Check if we find the solc version in the [profile.default] section
+  if $in_profile_default && [[ "$line" =~ solc\ *=\ *\"[0-9]+\.[0-9]+\.[0-9]+\" ]]; then
+    # Extract the version number and trim spaces
+    SOLC_VERSION=$(echo "$line" | sed -E 's/solc *= *"([0-9]+\.[0-9]+\.[0-9]+)"/\1/' | xargs)
+    break
+  fi
+
+  # Stop checking after we leave the [profile.default] section
+  if [[ "$line" =~ ^\[.*\] && ! "$line" =~ ^\[profile\.default\] ]]; then
+    in_profile_default=false
+  fi
+done < foundry.toml
+
+# Check if the version was extracted successfully
+if [ -z "$SOLC_VERSION" ]; then
+  echo "Error: Could not find solc version in foundry.toml"
+  exit 1
+fi
+
+echo "Extracted solc version: $SOLC_VERSION"
+
+# Update the .vscode/settings.json file
+SETTINGS_FILE=".vscode/settings.json"
+
+# Update the .vscode/settings.json file
+SETTINGS_FILE=".vscode/settings.json"
+
+# Create the file if it doesn't exist
+if [ ! -f "$SETTINGS_FILE" ]; then
+  echo '{}' > "$SETTINGS_FILE"
+fi
+
+# Check if the "solidity.compileUsingRemoteVersion" key exists
+if grep -q '"solidity.compileUsingRemoteVersion"' "$SETTINGS_FILE"; then
+  # If the key exists, update the version
+  sed -i -E "s/\"solidity.compileUsingRemoteVersion\": *\"[^\"]*\"/\"solidity.compileUsingRemoteVersion\": \"$SOLC_VERSION\"/" "$SETTINGS_FILE"
+else
+  # Key does not exist, so we modify the last key, add the new one, and close the bracket
+  LAST_KEY=$(tail -n 2 "$SETTINGS_FILE" | head -n 1 | sed 's/,$//') # Remove trailing comma if exists
+  sed -i '$d' "$SETTINGS_FILE" # Remove the last closing brace
+  sed -i '$d' "$SETTINGS_FILE" # Remove the line that will be rewriten
+  # Write the last key back with a comma, add the new key, and close the JSON object
+  echo "$LAST_KEY," >> "$SETTINGS_FILE"
+  echo "  \"solidity.compileUsingRemoteVersion\": \"$SOLC_VERSION\"" >> "$SETTINGS_FILE"
+  echo "}" >> "$SETTINGS_FILE"
+fi
+
+# Add the updated settings.json to the commit
+git add "$SETTINGS_FILE"
+
+echo "Updated .vscode/settings.json with solc version $SOLC_VERSION"
+
+exit 0
