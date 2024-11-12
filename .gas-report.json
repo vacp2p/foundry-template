@@ -1,0 +1,34 @@
+[
+   {
+      "contract" : "script/Deploy.s.sol:Deploy",
+      "deployment" : {
+         "gas" : 416048,
+         "size" : 2733
+      },
+      "functions" : {
+         "run()" : {
+            "calls" : 1,
+            "max" : 245006,
+            "mean" : 245006,
+            "median" : 245006,
+            "min" : 245006
+         }
+      }
+   },
+   {
+      "contract" : "src/Foo.sol:Foo",
+      "deployment" : {
+         "gas" : 0,
+         "size" : 0
+      },
+      "functions" : {
+         "id(uint256)" : {
+            "calls" : 1,
+            "max" : 235,
+            "mean" : 235,
+            "median" : 235,
+            "min" : 235
+         }
+      }
+   }
+]
